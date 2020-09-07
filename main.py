@@ -8,7 +8,7 @@
 
 # --- File Name: main.py
 # --- Creation Date: 07-09-2020
-# --- Last Modified: Mon 07 Sep 2020 16:53:14 AEST
+# --- Last Modified: Mon 07 Sep 2020 17:04:35 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -126,7 +126,11 @@ def main():
 
     # Iterate through the disentanglement metrics.
     eval_configs = sorted(study.get_eval_config_files())
-    blacklist = ['downstream_task_logistic_regression.gin']
+    blacklist = [
+        'downstream_task_logistic_regression.gin', 'beta_vae_sklearn.gin',
+        'dci.gin', 'downstream_task_boosted_trees.gin', 'mig.gin',
+        'modularity_explicitness.gin', 'sap_score.gin', 'unsupervised.gin'
+    ]
     for config in postprocess_config_files:
         post_name = os.path.basename(config).replace(".gin", "")
         post_dir = os.path.join(output_directory, "postprocessed", post_name)
