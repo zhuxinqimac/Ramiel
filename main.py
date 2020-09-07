@@ -8,7 +8,7 @@
 
 # --- File Name: main.py
 # --- Creation Date: 07-09-2020
-# --- Last Modified: Mon 07 Sep 2020 17:19:23 AEST
+# --- Last Modified: Mon 07 Sep 2020 17:34:30 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -102,10 +102,6 @@ def main():
     train.train_with_gin(model_dir, args.overwrite, ["test_model.gin"],
                          gin_bindings)
 
-    # We visualize reconstructions, samples and latent space traversals.
-    visualize_dir = os.path.join(output_directory, "visualizations")
-    visualize_model.visualize(model_dir, visualize_dir, args.overwrite)
-
     # We fix the random seed for the postprocessing and evaluation steps (each
     # config gets a different but reproducible seed derived from a master seed of
     # 0). The model seed was set via the gin bindings and configs of the study.
@@ -151,6 +147,10 @@ def main():
                 evaluate.evaluate_with_gin(post_dir, metric_dir,
                                            args.overwrite, [gin_eval_config],
                                            eval_bindings)
+
+    # We visualize reconstructions, samples and latent space traversals.
+    visualize_dir = os.path.join(output_directory, "visualizations")
+    visualize_model.visualize(model_dir, visualize_dir, args.overwrite)
 
 
 if __name__ == "__main__":
