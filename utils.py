@@ -8,7 +8,7 @@
 
 # --- File Name: utils.py
 # --- Creation Date: 06-09-2020
-# --- Last Modified: Sun 06 Sep 2020 16:21:04 AEST
+# --- Last Modified: Mon 07 Sep 2020 15:50:14 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -16,7 +16,8 @@ Docstring
 """
 import math
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+import argparse
 
 
 def get_return_v(x, topk=1):
@@ -40,3 +41,14 @@ def split_latents(x, minibatch_size):
     mask_1 = tf.cast(idx_range < split_idx[:, tf.newaxis], tf.float32)
     mask_2 = 1. - mask_1
     return x * mask_1, x * mask_2
+
+
+def _str_to_bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
