@@ -8,7 +8,7 @@
 
 # --- File Name: main.py
 # --- Creation Date: 07-09-2020
-# --- Last Modified: Mon 07 Sep 2020 17:04:35 AEST
+# --- Last Modified: Mon 07 Sep 2020 17:11:44 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -69,7 +69,7 @@ def main():
 
     # 1. Settings
     study = reproduce.STUDIES[args.study]
-    hyps = args.hyps.split('_')
+    args.hyps = args.hyps.split('_')
     print()
     study.print_postprocess_config()
     print()
