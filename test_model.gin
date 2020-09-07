@@ -14,7 +14,7 @@
 # limitations under the License.
 
 dataset.name = "dsprites_full"
-model.batch_size = 64
+model.batch_size = 512
 model.model = @GroupVAE()
 GroupVAE.hy_rec = 1.
 GroupVAE.hy_mat = 1.
@@ -23,7 +23,8 @@ GroupVAE.hy_spl = 1.
 model.random_seed = 0
 encoder.num_latent = 10
 vae_optimizer.optimizer_fn = @AdamOptimizer
-model.training_steps = 300000
+#model.training_steps = 300000
+model.training_steps = 100000
 model.random_seed=0
 AdamOptimizer.beta1 = 0.9
 AdamOptimizer.beta2 = 0.999

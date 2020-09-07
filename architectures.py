@@ -17,6 +17,9 @@ Docstring
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'disentanglement_lib'))
 import math
 from disentanglement_lib.methods.shared import architectures  # pylint: disable=unused-import
 from disentanglement_lib.methods.shared import losses  # pylint: disable=unused-import
