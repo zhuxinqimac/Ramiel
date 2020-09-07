@@ -42,11 +42,24 @@ with open("local_config.txt", "r") as f:
 # base_path = "/project/xqzhu_dis/repo_results/Ramiel/test"
 overwrite = True
 
+gpus = tf.config.experimental.list_physical_devices('GPU')
+# tf.config.experimental.set_memory_growth(gpu, True)
+if gpus:
+    try:
+        # Currently, memory growth needs to be the same across GPUs
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+        print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+    except RuntimeError as e:
+        # Memory growth must be set before GPUs have been initialized
+        print(e)
+
 hys = []
 # for hy_rec in ["0.1", "0.5", "0.", "1.", "2."]:
 # for hy_spl in ["0.1", "0.5", "0.", "1.", "2."]:
 for hy_rec in ["0."]:
-    for hy_mat in ["0."]:
+    for hy_mat in ["0.1"]:
         for hy_oth in ["0."]:
             for hy_spl in ["0."]:
                 for rand_seed in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]:
