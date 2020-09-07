@@ -8,7 +8,7 @@
 
 # --- File Name: main.py
 # --- Creation Date: 07-09-2020
-# --- Last Modified: Mon 07 Sep 2020 17:11:44 AEST
+# --- Last Modified: Mon 07 Sep 2020 17:19:23 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -115,7 +115,7 @@ def main():
     postprocess_config_files = sorted(study.get_postprocess_config_files())
     for config in postprocess_config_files:
         post_name = os.path.basename(config).replace(".gin", "")
-        print("Extracting representation %s...", post_name)
+        print("Extracting representation " + post_name + "...")
         post_dir = os.path.join(output_directory, "postprocessed", post_name)
         postprocess_bindings = [
             "postprocess.random_seed = {}".format(random_state.randint(2**32)),
@@ -139,8 +139,8 @@ def main():
             if os.path.basename(gin_eval_config) not in blacklist:
                 metric_name = os.path.basename(gin_eval_config).replace(
                     ".gin", "")
-                print("Computing metric '%s' on '%s'...", metric_name,
-                      post_name)
+                print("Computing metric " + metric_name + " on " + post_name +
+                      "...")
                 metric_dir = os.path.join(output_directory, "metrics",
                                           post_name, metric_name)
                 eval_bindings = [
