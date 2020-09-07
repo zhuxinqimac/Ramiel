@@ -8,7 +8,7 @@
 
 # --- File Name: models.py
 # --- Creation Date: 05-09-2020
-# --- Last Modified: Sun 06 Sep 2020 17:17:03 AEST
+# --- Last Modified: Mon 07 Sep 2020 18:12:24 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -19,7 +19,10 @@ from __future__ import division
 from __future__ import print_function
 import os
 import sys
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'disentanglement_lib'))
+sys.path.insert(
+    0,
+    os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+                 'disentanglement_lib'))
 import math
 from disentanglement_lib.methods.shared import architectures  # pylint: disable=unused-import
 from disentanglement_lib.methods.shared import losses  # pylint: disable=unused-import
@@ -40,13 +43,16 @@ class GroupVAE(BaseVAE):
     """GroupVAE.
     Test
     """
-    def __init__(self,
-                 hy_rec=gin.REQUIRED,
-                 hy_mat=gin.REQUIRED,
-                 hy_oth=gin.REQUIRED,
-                 hy_spl=gin.REQUIRED):
+    def __init__(
+            self,
+            hy_rec=gin.REQUIRED,
+            hy_mat=gin.REQUIRED,
+            # hy_gmat=gin.REQUIRED,
+            hy_oth=gin.REQUIRED,
+            hy_spl=gin.REQUIRED):
         self.hy_rec = hy_rec
         self.hy_mat = hy_mat
+        # self.hy_gmat = hy_gmat
         self.hy_oth = hy_oth
         self.hy_spl = hy_spl
 
@@ -157,8 +163,10 @@ class GroupVAE(BaseVAE):
                                          batch_size // 2]
         gfeats_G_split_2 = group_feats_G[2 * batch_size + batch_size // 2:]
 
-        gfeats_G_mul = tf.matmul(gfeats_G[:batch_size // 2],
-                                 gfeats_G[batch_size // 2:])
+        gfeats_E_mul = tf.matmul(group_feats_E[:batch_size // 2],
+                                 group_feats_E[batch_size // 2:])
+        # gfeats_G_mul = tf.matmul(gfeats_G[:batch_size // 2],
+        # gfeats_G[batch_size // 2:])
         gfeats_G_2 = tf.matmul(gfeats_G, gfeats_G, transpose_b=True)
         G_mat_eye = tf.eye(mat_dim,
                            dtype=gfeats_G_2.dtype,
@@ -168,7 +176,9 @@ class GroupVAE(BaseVAE):
         rec_loss = tf.reduce_mean(
             tf.reduce_sum(tf.square(group_feats_E - gfeats_G), axis=[1, 2]))
         mat_loss = tf.reduce_mean(
-            tf.reduce_sum(tf.square(gfeats_G_mul - gfeats_G_sum), axis=[1, 2]))
+            tf.reduce_sum(tf.square(gfeats_E_mul - gfeats_G_sum), axis=[1, 2]))
+        # gmat_loss = tf.reduce_mean(
+        # tf.reduce_sum(tf.square(gfeats_G_mul - gfeats_G_sum), axis=[1, 2]))
         oth_loss = tf.reduce_mean(
             tf.reduce_sum(tf.square(gfeats_G_2 - G_mat_eye), axis=[1, 2]))
         spl_loss = tf.reduce_mean(
