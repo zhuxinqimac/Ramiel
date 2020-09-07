@@ -14,7 +14,7 @@
 # limitations under the License.
 
 dataset.name = "dsprites_full"
-model.batch_size = 512
+model.batch_size = 64
 model.model = @GroupVAE()
 GroupVAE.hy_rec = 1.
 GroupVAE.hy_mat = 1.
