@@ -8,7 +8,7 @@
 
 # --- File Name: collect_results.py
 # --- Creation Date: 08-09-2020
-# --- Last Modified: Tue 08 Sep 2020 17:53:29 AEST
+# --- Last Modified: Tue 08 Sep 2020 17:56:09 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -139,6 +139,8 @@ def main():
     res_dict = {}
     key_template = METRICS_TEMPLATE[args.metric]
     for subdir in subdirs:
+        if not os.path.isdir(subdir):
+            continue
         sub_path = os.path.join(args.results_dir, subdir)
         parse_subdir = subdir.split('-')
         hyps = '-'.join(parse_subdir[1:-1])
