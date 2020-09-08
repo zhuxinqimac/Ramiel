@@ -8,7 +8,7 @@
 
 # --- File Name: collect_results.py
 # --- Creation Date: 08-09-2020
-# --- Last Modified: Tue 08 Sep 2020 18:04:59 AEST
+# --- Last Modified: Tue 08 Sep 2020 18:05:58 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -68,8 +68,8 @@ def get_mean_std_for_config(v_ls, target):
     for item in v_ls:
         if item is not None:
             pure_ls.append(item[target])
-    return None, None if len(pure_ls) == 0 else np.mean(pure_ls), np.std(
-        pure_ls)
+    return (None, None) if len(pure_ls) == 0 else (np.mean(pure_ls),
+                                                   np.std(pure_ls))
 
 
 def count_samples(x):
