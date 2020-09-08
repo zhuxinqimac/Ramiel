@@ -8,7 +8,7 @@
 
 # --- File Name: collect_results.py
 # --- Creation Date: 08-09-2020
-# --- Last Modified: Tue 08 Sep 2020 17:48:39 AEST
+# --- Last Modified: Tue 08 Sep 2020 17:53:29 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -100,9 +100,12 @@ def get_moments(res_dict, template):
 def get_metric_result(subdir, metric, representation):
     result_json = os.path.join(subdir, 'metrics', representation, metric,
                                'results/json/evaluation_results.json')
-    with open(result_json, 'r') as f:
-        data = json.load(f)
-    return data
+    if os.path.exists(result_json):
+        with open(result_json, 'r') as f:
+            data = json.load(f)
+        return data
+    else:
+        return None
 
 
 def main():
