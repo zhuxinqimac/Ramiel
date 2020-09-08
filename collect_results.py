@@ -8,7 +8,7 @@
 
 # --- File Name: collect_results.py
 # --- Creation Date: 08-09-2020
-# --- Last Modified: Tue 08 Sep 2020 18:13:13 AEST
+# --- Last Modified: Tue 08 Sep 2020 18:25:11 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -164,7 +164,7 @@ def main():
     print('results_df:', results_df)
     results_df.to_csv(os.path.join(
         args.results_dir,
-        'collected-' + args.metric + args.representation + '.csv'),
+        'collected-' + args.metric + '-' + args.representation + '.csv'),
                       na_rep='-',
                       index=False,
                       float_format='%.3f')
