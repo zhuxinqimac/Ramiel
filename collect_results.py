@@ -8,7 +8,7 @@
 
 # --- File Name: collect_results.py
 # --- Creation Date: 08-09-2020
-# --- Last Modified: Tue 08 Sep 2020 18:02:45 AEST
+# --- Last Modified: Tue 08 Sep 2020 18:04:59 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -90,6 +90,8 @@ def get_moments(res_dict, template):
     for k, v in res_dict.items():
         res_dict_moments[k] = {}
         for res_k in template.keys():
+            x = get_mean_std_for_config(v, res_k)
+            print(x)
             res_dict_moments[k][res_k+'.mean'], \
                 res_dict_moments[k][res_k+'.std'] \
                 = get_mean_std_for_config(v, res_k)
