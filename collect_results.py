@@ -8,7 +8,7 @@
 
 # --- File Name: collect_results.py
 # --- Creation Date: 08-09-2020
-# --- Last Modified: Tue 08 Sep 2020 18:07:24 AEST
+# --- Last Modified: Tue 08 Sep 2020 18:13:13 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -37,7 +37,7 @@ METRICS_TEMPLATE = {
     'factor_vae_metric': {
         "train_accuracy": None,
         "eval_accuracy": None,
-        "num_active_dims": None
+        # "num_active_dims": None # disentanglement_lib wrong implementation.
     },
     'mig': {
         "discrete_mig": None
