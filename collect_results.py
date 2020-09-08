@@ -8,7 +8,7 @@
 
 # --- File Name: collect_results.py
 # --- Creation Date: 08-09-2020
-# --- Last Modified: Tue 08 Sep 2020 17:58:52 AEST
+# --- Last Modified: Tue 08 Sep 2020 18:01:47 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -136,7 +136,6 @@ def main():
     # default=False)
     args = parser.parse_args()
     subdirs = os.listdir(args.results_dir)
-    print('subdirs:', subdirs)
     res_dict = {}
     key_template = METRICS_TEMPLATE[args.metric]
     for subdir in subdirs:
@@ -145,6 +144,7 @@ def main():
         sub_path = os.path.join(args.results_dir, subdir)
         parse_subdir = subdir.split('-')
         hyps = '-'.join(parse_subdir[1:-1])
+        print('hyps:', hyps)
         seed = parse_subdir[-1]
         if hyps not in res_dict:
             res_dict[hyps] = [None] * 10
