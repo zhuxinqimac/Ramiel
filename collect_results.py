@@ -8,7 +8,7 @@
 
 # --- File Name: collect_results.py
 # --- Creation Date: 08-09-2020
-# --- Last Modified: Tue 08 Sep 2020 17:56:09 AEST
+# --- Last Modified: Tue 08 Sep 2020 17:57:17 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -152,6 +152,7 @@ def main():
                                                       args.representation)
     # {'0_0_0_0': {'eval.mean': 0.75, 'eval.std': 0.05, 'n_samples': 2}, ...}
     res_dict = get_moments(res_dict, key_template)
+    print(res_dict)
     col_heads = ['_config'] + list(res_dict[list(res_dict.keys())[0]].keys())
     col_dicts = {k: [] for k in col_heads}
     for k, v in res_dict.items():
