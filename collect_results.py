@@ -8,7 +8,7 @@
 
 # --- File Name: collect_results.py
 # --- Creation Date: 08-09-2020
-# --- Last Modified: Tue 08 Sep 2020 18:05:58 AEST
+# --- Last Modified: Tue 08 Sep 2020 18:07:24 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -90,8 +90,6 @@ def get_moments(res_dict, template):
     for k, v in res_dict.items():
         res_dict_moments[k] = {}
         for res_k in template.keys():
-            x = get_mean_std_for_config(v, res_k)
-            print(x)
             res_dict_moments[k][res_k+'.mean'], \
                 res_dict_moments[k][res_k+'.std'] \
                 = get_mean_std_for_config(v, res_k)
@@ -146,7 +144,6 @@ def main():
             continue
         parse_subdir = subdir.split('-')
         hyps = '-'.join(parse_subdir[1:-1])
-        # print('hyps:', hyps)
         seed = parse_subdir[-1]
         if hyps not in res_dict:
             res_dict[hyps] = [None] * 10
@@ -155,7 +152,6 @@ def main():
                                                       args.representation)
     # {'0_0_0_0': {'eval.mean': 0.75, 'eval.std': 0.05, 'n_samples': 2}, ...}
     res_dict = get_moments(res_dict, key_template)
-    print(res_dict)
     col_heads = ['_config'] + list(res_dict[list(res_dict.keys())[0]].keys())
     col_dicts = {k: [] for k in col_heads}
     for k, v in res_dict.items():
