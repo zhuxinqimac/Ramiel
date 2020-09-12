@@ -8,7 +8,7 @@
 
 # --- File Name: main.py
 # --- Creation Date: 07-09-2020
-# --- Last Modified: Sun 13 Sep 2020 02:34:25 AEST
+# --- Last Modified: Sun 13 Sep 2020 02:46:29 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -68,10 +68,7 @@ def main():
     parser.add_argument('--dataset',
                         help='Dataset.',
                         type=str,
-                        default='dsprites_full',
-                        choices=['dsprites_full', 'color_dsprites',
-                                 'noisy_dsprites', 'scream_dsprites',
-                                 'smallnorb', 'cars3d', 'shapes3d'])
+                        default='dsprites_full')
     args = parser.parse_args()
 
     # 1. Settings
