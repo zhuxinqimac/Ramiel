@@ -8,7 +8,7 @@
 
 # --- File Name: main.py
 # --- Creation Date: 07-09-2020
-# --- Last Modified: Mon 07 Sep 2020 17:49:01 AEST
+# --- Last Modified: Sun 13 Sep 2020 02:25:45 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -65,6 +65,13 @@ def main():
                         help='Whether to overwrite output directory.',
                         type=_str_to_bool,
                         default=False)
+    parser.add_argument('--dataset',
+                        help='Dataset.',
+                        type=str,
+                        default='dsprites_full',
+                        choices=['dsprites_full', 'color_dsprites',
+                                 'noisy_dsprites', 'scream_dsprites',
+                                 'smallnorb', 'cars3d', 'shapes3d'])
     args = parser.parse_args()
 
     # 1. Settings
@@ -97,7 +104,8 @@ def main():
         "GroupVAE.hy_mat = " + args.hyps[1],
         "GroupVAE.hy_oth = " + args.hyps[2],
         "GroupVAE.hy_spl = " + args.hyps[3],
-        "model.random_seed = " + args.hyps[4]
+        "model.random_seed = " + args.hyps[4],
+        "dataset.name = " + args.dataset
     ]
     train.train_with_gin(model_dir, args.overwrite, ["test_model.gin"],
                          gin_bindings)
