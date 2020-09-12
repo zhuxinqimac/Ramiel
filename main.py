@@ -8,7 +8,7 @@
 
 # --- File Name: main.py
 # --- Creation Date: 07-09-2020
-# --- Last Modified: Sun 13 Sep 2020 02:25:45 AEST
+# --- Last Modified: Sun 13 Sep 2020 02:34:25 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -105,7 +105,7 @@ def main():
         "GroupVAE.hy_oth = " + args.hyps[2],
         "GroupVAE.hy_spl = " + args.hyps[3],
         "model.random_seed = " + args.hyps[4],
-        "dataset.name = " + args.dataset
+        "dataset.name = '" + args.dataset + "'"
     ]
     train.train_with_gin(model_dir, args.overwrite, ["test_model.gin"],
                          gin_bindings)
