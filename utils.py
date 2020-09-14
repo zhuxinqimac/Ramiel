@@ -8,7 +8,7 @@
 
 # --- File Name: utils.py
 # --- Creation Date: 06-09-2020
-# --- Last Modified: Mon 14 Sep 2020 16:46:59 AEST
+# --- Last Modified: Mon 14 Sep 2020 18:15:18 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -47,7 +47,8 @@ def split_latents(x, minibatch_size, hy_ncut=1):
         mask_tmp = tf.cast(idx_range < split_idx[:, i:i + 1], tf.float32)
         masks.append(mask_tmp - mask_last)
         masks_last = mask_tmp
-    masks.append(1. - masks[-1])
+    mask_tmp = tf.cast(idx_range < split_idx[:, -1:], tf.float32)
+    masks.append(1. - mask_tmp)
     x_split_ls = [x * mask for mask in masks]
     # mask_1 = tf.cast(idx_range < split_idx[:, tf.newaxis], tf.float32)
     # mask_2 = 1. - mask_1
