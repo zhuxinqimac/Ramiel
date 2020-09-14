@@ -20,6 +20,7 @@ GroupVAE.hy_rec = 1.
 GroupVAE.hy_mat = 1.
 GroupVAE.hy_oth = 1.
 GroupVAE.hy_spl = 1.
+GroupVAE.hy_ncut = 1
 model.random_seed = 0
 encoder.num_latent = 10
 vae_optimizer.optimizer_fn = @AdamOptimizer

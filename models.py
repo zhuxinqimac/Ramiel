@@ -8,7 +8,7 @@
 
 # --- File Name: models.py
 # --- Creation Date: 05-09-2020
-# --- Last Modified: Mon 07 Sep 2020 18:12:24 AEST
+# --- Last Modified: Mon 14 Sep 2020 17:12:07 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -49,12 +49,14 @@ class GroupVAE(BaseVAE):
             hy_mat=gin.REQUIRED,
             # hy_gmat=gin.REQUIRED,
             hy_oth=gin.REQUIRED,
-            hy_spl=gin.REQUIRED):
+            hy_spl=gin.REQUIRED,
+            hy_ncut=gin.REQUIRED):
         self.hy_rec = hy_rec
         self.hy_mat = hy_mat
         # self.hy_gmat = hy_gmat
         self.hy_oth = hy_oth
         self.hy_spl = hy_spl
+        self.hy_ncut = int(hy_ncut)
 
     def model_fn(self, features, labels, mode, params):
         """TPUEstimator compatible model function."""
@@ -68,11 +70,17 @@ class GroupVAE(BaseVAE):
 
         z_sampled_sum = z_sampled[:batch_size // 2] + \
             z_sampled[batch_size // 2:]
-        z_sampled_split_1, z_sampled_split_2 = split_latents(
-            z_sampled, batch_size)
-        z_sampled_all = tf.concat(
-            [z_sampled, z_sampled_sum, z_sampled_split_1, z_sampled_split_2],
-            axis=0)
+        # z_sampled_split_1, z_sampled_split_2 = split_latents(
+        # z_sampled, batch_size)
+        z_sampled_split_ls = split_latents(z_sampled,
+                                           batch_size,
+                                           hy_ncut=self.hy_ncut)
+        # z_sampled_all = tf.concat(
+        # [z_sampled, z_sampled_sum, z_sampled_split_1, z_sampled_split_2],
+        # axis=0)
+        z_sampled_all = tf.concat([z_sampled, z_sampled_sum] +
+                                  z_sampled_split_ls,
+                                  axis=0)
         reconstructions, group_feats_G = self.decode_with_gfeats(
             z_sampled_all, data_shape, is_training)
 
@@ -158,10 +166,15 @@ class GroupVAE(BaseVAE):
         mat_dim = group_feats_E.get_shape().as_list()[1]
         gfeats_G = group_feats_G[:batch_size]
         gfeats_G_sum = group_feats_G[batch_size:batch_size + batch_size // 2]
-        gfeats_G_split_1 = group_feats_G[batch_size +
-                                         batch_size // 2:2 * batch_size +
-                                         batch_size // 2]
-        gfeats_G_split_2 = group_feats_G[2 * batch_size + batch_size // 2:]
+        # gfeats_G_split_1 = group_feats_G[batch_size +
+        # batch_size // 2:2 * batch_size +
+        # batch_size // 2]
+        # gfeats_G_split_2 = group_feats_G[2 * batch_size + batch_size // 2:]
+        gfeats_G_split_ls = [
+            group_feats_G[(i + 1) * batch_size +
+                          batch_size // 2:(i + 2) * batch_size +
+                          batch_size // 2] for i in range(self.hy_ncut + 1)
+        ]
 
         gfeats_E_mul = tf.matmul(group_feats_E[:batch_size // 2],
                                  group_feats_E[batch_size // 2:])
@@ -171,7 +184,11 @@ class GroupVAE(BaseVAE):
         G_mat_eye = tf.eye(mat_dim,
                            dtype=gfeats_G_2.dtype,
                            batch_shape=[batch_size])
-        gfeats_G_split_mul = tf.matmul(gfeats_G_split_1, gfeats_G_split_2)
+        # gfeats_G_split_mul = tf.matmul(gfeats_G_split_1, gfeats_G_split_2)
+        gfeats_G_split_mul = gfeats_G_split_ls[0]
+        for i in range(1, self.hy_ncut + 1):
+            gfeats_G_split_mul = tf.matmul(gfeats_G_split_mul,
+                                           gfeats_G_split_ls[i])
 
         rec_loss = tf.reduce_mean(
             tf.reduce_sum(tf.square(group_feats_E - gfeats_G), axis=[1, 2]))

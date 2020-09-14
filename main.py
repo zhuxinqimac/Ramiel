@@ -8,7 +8,7 @@
 
 # --- File Name: main.py
 # --- Creation Date: 07-09-2020
-# --- Last Modified: Sun 13 Sep 2020 02:46:29 AEST
+# --- Last Modified: Mon 14 Sep 2020 17:11:24 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -60,7 +60,7 @@ def main():
     parser.add_argument('--hyps',
                         help='Hyperparameters of rec_mat_oth_spl_seed.',
                         type=str,
-                        default='1_1_1_1_0')
+                        default='1_1_1_1_1_0')
     parser.add_argument('--overwrite',
                         help='Whether to overwrite output directory.',
                         type=_str_to_bool,
@@ -101,7 +101,8 @@ def main():
         "GroupVAE.hy_mat = " + args.hyps[1],
         "GroupVAE.hy_oth = " + args.hyps[2],
         "GroupVAE.hy_spl = " + args.hyps[3],
-        "model.random_seed = " + args.hyps[4],
+        "GroupVAE.hy_ncut = " + args.hyps[4],
+        "model.random_seed = " + args.hyps[5],
         "dataset.name = '" + args.dataset + "'"
     ]
     train.train_with_gin(model_dir, args.overwrite, ["test_model.gin"],

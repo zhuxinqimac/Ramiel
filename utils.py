@@ -8,7 +8,7 @@
 
 # --- File Name: utils.py
 # --- Creation Date: 06-09-2020
-# --- Last Modified: Mon 07 Sep 2020 15:50:14 AEST
+# --- Last Modified: Mon 14 Sep 2020 16:46:59 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -32,15 +32,27 @@ def get_return_v(x, topk=1):
             return tuple(x[:topk])
 
 
-def split_latents(x, minibatch_size):
+def split_latents(x, minibatch_size, hy_ncut=1):
     # x: [b, dim]
     b = minibatch_size
     dim = x.get_shape().as_list()[1]
-    split_idx = tf.random.uniform(shape=[b], maxval=dim + 1, dtype=tf.int32)
+    split_idx = tf.random.uniform(shape=[b, hy_ncut],
+                                  maxval=dim + 1,
+                                  dtype=tf.int32)
+    split_idx = tf.sort(split_idx, axis=-1)
     idx_range = tf.tile(tf.range(dim)[tf.newaxis, :], [b, 1])
-    mask_1 = tf.cast(idx_range < split_idx[:, tf.newaxis], tf.float32)
-    mask_2 = 1. - mask_1
-    return x * mask_1, x * mask_2
+    masks = []
+    mask_last = tf.zeros([b, dim], dtype=tf.float32)
+    for i in range(hy_ncut):
+        mask_tmp = tf.cast(idx_range < split_idx[:, i:i + 1], tf.float32)
+        masks.append(mask_tmp - mask_last)
+        masks_last = mask_tmp
+    masks.append(1. - masks[-1])
+    x_split_ls = [x * mask for mask in masks]
+    # mask_1 = tf.cast(idx_range < split_idx[:, tf.newaxis], tf.float32)
+    # mask_2 = 1. - mask_1
+    # return x * mask_1, x * mask_2
+    return x_split_ls
 
 
 def _str_to_bool(v):
