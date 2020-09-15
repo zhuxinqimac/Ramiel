@@ -8,7 +8,7 @@
 
 # --- File Name: main.py
 # --- Creation Date: 07-09-2020
-# --- Last Modified: Mon 14 Sep 2020 17:11:24 AEST
+# --- Last Modified: Tue 15 Sep 2020 15:45:52 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -69,6 +69,10 @@ def main():
                         help='Dataset.',
                         type=str,
                         default='dsprites_full')
+    parser.add_argument('--recons_type',
+                        help='Reconstruction loss type.',
+                        type=str,
+                        default='bernoulli_loss')
     args = parser.parse_args()
 
     # 1. Settings
@@ -103,7 +107,8 @@ def main():
         "GroupVAE.hy_spl = " + args.hyps[3],
         "GroupVAE.hy_ncut = " + args.hyps[4],
         "model.random_seed = " + args.hyps[5],
-        "dataset.name = '" + args.dataset + "'"
+        "dataset.name = '" + args.dataset + "'",
+        "reconstruction_loss.loss_fn = @" + args.recons_type
     ]
     train.train_with_gin(model_dir, args.overwrite, ["test_model.gin"],
                          gin_bindings)
