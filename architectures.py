@@ -8,7 +8,7 @@
 
 # --- File Name: architectures.py
 # --- Creation Date: 06-09-2020
-# --- Last Modified: Fri 18 Sep 2020 23:27:29 AEST
+# --- Last Modified: Sat 19 Sep 2020 00:13:01 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -213,7 +213,7 @@ def liealg_deconv_decoder(latent_tensor, output_shape, is_training=True):
       tmp_onehot = tf.one_hot([i], latent_dim, dtype=tf.float32)
       lie_alg_tmp = tmp_eye * (1 - tmp_onehot[:, tf.newaxis])
       lie_alg_basis_ls.append(lie_alg_tmp)
-  lie_alg_basis = tf.concat(lie_alg_basis_ls, [0])[tf.newaxis, ...]
+  lie_alg_basis = tf.concat(lie_alg_basis_ls, axis=0)[tf.newaxis, ...]
   lie_alg_mul = latent_tensor[..., tf.newaxis, tf.newaxis] * lie_alg_basis
   lie_alg = tf.reduce_sum(lie_alg_mul, axis=[1])
   lie_group = tf.linalg.expm(lie_alg)
