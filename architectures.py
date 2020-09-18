@@ -8,7 +8,7 @@
 
 # --- File Name: architectures.py
 # --- Creation Date: 06-09-2020
-# --- Last Modified: Sun 06 Sep 2020 21:29:57 AEST
+# --- Last Modified: Fri 18 Sep 2020 23:27:29 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -186,3 +186,73 @@ def group_deconv_decoder(latent_tensor,
     mat_dim = int(math.sqrt(group_feats_size))
     group_feats_mat = tf.reshape(group_feats, [-1, mat_dim, mat_dim])
     return tf.reshape(d6, [-1] + output_shape), group_feats_mat
+
+
+@gin.configurable("liealg_deconv_decoder", whitelist=[])
+def liealg_deconv_decoder(latent_tensor, output_shape, is_training=True):
+  """Convolutional decoder used in beta-VAE paper for the chairs data.
+
+  Based on row 3 of Table 1 on page 13 of "beta-VAE: Learning Basic Visual
+  Concepts with a Constrained Variational Framework"
+  (https://openreview.net/forum?id=Sy2fzU9gl)
+
+  Args:
+    latent_tensor: Input tensor of shape (batch_size,) to connect decoder to.
+    output_shape: Shape of the data.
+    is_training: Whether or not the graph is built for training (UNUSED).
+
+  Returns:
+    Output tensor of shape (batch_size, 64, 64, num_channels) with the [0,1]
+      pixel intensities.
+  """
+  del is_training
+  lie_alg_basis_ls = []
+  latent_dim = latent_tensor.get_shape().as_list()[-1]
+  for i in range(latent_dim):
+      tmp_eye = tf.eye(latent_dim, dtype=tf.float32)[tf.newaxis, ...]
+      tmp_onehot = tf.one_hot([i], latent_dim, dtype=tf.float32)
+      lie_alg_tmp = tmp_eye * (1 - tmp_onehot[:, tf.newaxis])
+      lie_alg_basis_ls.append(lie_alg_tmp)
+  lie_alg_basis = tf.concat(lie_alg_basis_ls, [0])[tf.newaxis, ...]
+  lie_alg_mul = latent_tensor[..., tf.newaxis, tf.newaxis] * lie_alg_basis
+  lie_alg = tf.reduce_sum(lie_alg_mul, axis=[1])
+  lie_group = tf.linalg.expm(lie_alg)
+  lie_group_tensor = tf.reshape(lie_group, [-1, latent_dim * latent_dim])
+
+  d1 = tf.layers.dense(lie_group_tensor, 256, activation=tf.nn.relu)
+  d2 = tf.layers.dense(d1, 1024, activation=tf.nn.relu)
+  d2_reshaped = tf.reshape(d2, shape=[-1, 4, 4, 64])
+  d3 = tf.layers.conv2d_transpose(
+      inputs=d2_reshaped,
+      filters=64,
+      kernel_size=4,
+      strides=2,
+      activation=tf.nn.relu,
+      padding="same",
+  )
+
+  d4 = tf.layers.conv2d_transpose(
+      inputs=d3,
+      filters=32,
+      kernel_size=4,
+      strides=2,
+      activation=tf.nn.relu,
+      padding="same",
+  )
+
+  d5 = tf.layers.conv2d_transpose(
+      inputs=d4,
+      filters=32,
+      kernel_size=4,
+      strides=2,
+      activation=tf.nn.relu,
+      padding="same",
+  )
+  d6 = tf.layers.conv2d_transpose(
+      inputs=d5,
+      filters=output_shape[2],
+      kernel_size=4,
+      strides=2,
+      padding="same",
+  )
+  return tf.reshape(d6, [-1] + output_shape)

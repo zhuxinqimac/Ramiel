@@ -8,7 +8,7 @@
 
 # --- File Name: main.py
 # --- Creation Date: 07-09-2020
-# --- Last Modified: Tue 15 Sep 2020 15:45:52 AEST
+# --- Last Modified: Fri 18 Sep 2020 23:49:13 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -57,6 +57,18 @@ def main():
                         help='Name of the study.',
                         type=str,
                         default='unsupervised_study_v1')
+    parser.add_argument('--model_gin',
+                        help='Name of the gin config.',
+                        type=str,
+                        default='test_model.gin')
+    parser.add_argument('--model_name',
+                        help='Name of the model.',
+                        type=str,
+                        default='GroupVAE')
+    parser.add_argument('--vae_beta',
+                        help='Beta-VAE beta.',
+                        type=str,
+                        default='1')
     parser.add_argument('--hyps',
                         help='Hyperparameters of rec_mat_oth_spl_seed.',
                         type=str,
@@ -98,9 +110,11 @@ def main():
 
     # Call training module to train the custom model.
     output_directory = os.path.join(args.result_dir,
-                                    "GroupVAE-" + "-".join(args.hyps))
+                                    args.model_name + "-" + "-".join(args.hyps))
     model_dir = os.path.join(output_directory, "model")
     gin_bindings = [
+        "model.model = @" + args.model_name + "()",
+        "vae.beta = " + args.vae_beta,
         "GroupVAE.hy_rec = " + args.hyps[0],
         "GroupVAE.hy_mat = " + args.hyps[1],
         "GroupVAE.hy_oth = " + args.hyps[2],
@@ -110,7 +124,7 @@ def main():
         "dataset.name = '" + args.dataset + "'",
         "reconstruction_loss.loss_fn = @" + args.recons_type
     ]
-    train.train_with_gin(model_dir, args.overwrite, ["test_model.gin"],
+    train.train_with_gin(model_dir, args.overwrite, [args.model_gin],
                          gin_bindings)
 
     # We fix the random seed for the postprocessing and evaluation steps (each
