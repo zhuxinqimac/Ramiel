@@ -8,7 +8,7 @@
 
 # --- File Name: main.py
 # --- Creation Date: 07-09-2020
-# --- Last Modified: Fri 18 Sep 2020 23:49:13 AEST
+# --- Last Modified: Sat 19 Sep 2020 00:23:02 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -109,8 +109,11 @@ def main():
             print(e)
 
     # Call training module to train the custom model.
-    output_directory = os.path.join(args.result_dir,
-                                    args.model_name + "-" + "-".join(args.hyps))
+    if args.model_name == "GroupVAE":
+        dir_name = "GroupVAE-" + "-".join(args.hyps)
+    elif args.model_name == "vae":
+        dir_name = "LieVAE-" + args.vae_beta + "-" + args.hyps[5]
+    output_directory = os.path.join(args.result_dir, dir_name)
     model_dir = os.path.join(output_directory, "model")
     gin_bindings = [
         "model.model = @" + args.model_name + "()",
