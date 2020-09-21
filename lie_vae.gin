@@ -16,11 +16,11 @@
 dataset.name = "dsprites_full"
 model.batch_size = 64
 model.model = @LieVAE()
-GroupVAE.hy_rec = 1.
-GroupVAE.hy_spl = 1.
-GroupVAE.hy_hes = 0.
-GroupVAE.hy_lin = 0.
-GroupVAE.hy_ncut = 1
+LieVAE.hy_rec = 1.
+LieVAE.hy_spl = 1.
+LieVAE.hy_hes = 0.
+LieVAE.hy_lin = 0.
+LieVAE.hy_ncut = 1
 model.random_seed = 0
 encoder.num_latent = 10
 vae_optimizer.optimizer_fn = @AdamOptimizer
