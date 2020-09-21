@@ -8,7 +8,7 @@
 
 # --- File Name: lie_models.py
 # --- Creation Date: 21-09-2020
-# --- Last Modified: Mon 21 Sep 2020 16:14:54 AEST
+# --- Last Modified: Mon 21 Sep 2020 16:48:15 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -186,10 +186,10 @@ class LieVAE(BaseVAE):
         spl_loss = tf.reduce_mean(
             tf.reduce_sum(tf.square(gfeats_G_split_mul - gfeats_G),
                           axis=[1, 2]))
-        hessian_loss = tf.reduce_mean(tf.square(lie_alg_G_split_mul),
-                                      axis=[1, 2])
-        linear_loss = tf.reduce_mean(tf.square(lie_alg_linear_G_split_mul),
-                                     axis=[1, 2])
+        hessian_loss = tf.reduce_mean(
+            tf.reduce_sum(tf.square(lie_alg_G_split_mul), axis=[1, 2]))
+        linear_loss = tf.reduce_mean(
+            tf.reduce_sum(tf.square(lie_alg_linear_G_split_mul), axis=[1, 2]))
         loss = self.hy_rec * rec_loss + self.hy_spl * spl_loss + \
             self.hy_hes * hessian_loss + self.hy_lin * linear_loss
         return kl_loss + loss
