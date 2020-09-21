@@ -8,7 +8,7 @@
 
 # --- File Name: architectures.py
 # --- Creation Date: 06-09-2020
-# --- Last Modified: Mon 21 Sep 2020 15:17:07 AEST
+# --- Last Modified: Mon 21 Sep 2020 16:59:10 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -288,14 +288,14 @@ def liealg_deconv_decoder(latent_tensor,
     latent_dim = latent_tensor.get_shape().as_list()[-1]
     mat_dim = int(math.sqrt(group_feats_size))
     for i in range(latent_dim):
-        init = tf.initializers.random_normal(0, 1)
+        init = tf.initializers.random_normal(0, 0.1)
         lie_alg_tmp = tf.get_variable('lie_alg_' + str(i),
                                       shape=[1, mat_dim, mat_dim],
                                       initializer=init)
         lie_alg_basis_ls.append(lie_alg_tmp)
     lie_alg_basis = tf.concat(lie_alg_basis_ls, axis=0)[tf.newaxis, ...] # [1, lat_dim, mat_dim, mat_dim]
     lie_alg_mul = latent_tensor[..., tf.newaxis, tf.newaxis] * lie_alg_basis # [b, lat_dim, mat_dim, mat_dim]
-    lie_alg = tf.reduce_sum(lie_alg_mul, axis=[1]) # [b, mat_dim, mat_dim]
+    lie_alg = tf.reduce_sum(lie_alg_mul, axis=1) # [b, mat_dim, mat_dim]
     lie_group = tf.linalg.expm(lie_alg) # [b, mat_dim, mat_dim]
     lie_group_tensor = tf.reshape(lie_group, [-1, mat_dim * mat_dim])
 
