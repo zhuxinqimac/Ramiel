@@ -36,5 +36,5 @@ AdamOptimizer.use_locking = False
 encoder.encoder_fn = @group_conv_encoder
 decoder.decoder_fn = @liealg_deconv_decoder
 group_conv_encoder.group_feats_size = 400
-group_deconv_decoder.group_feats_size = 400
+liealg_deconv_decoder.group_feats_size = 400
 reconstruction_loss.loss_fn = @bernoulli_loss
