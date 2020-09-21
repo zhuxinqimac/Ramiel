@@ -6,13 +6,13 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-# --- File Name: models.py
-# --- Creation Date: 05-09-2020
-# --- Last Modified: Mon 21 Sep 2020 15:34:06 AEST
+# --- File Name: lie_models.py
+# --- Creation Date: 21-09-2020
+# --- Last Modified: Mon 21 Sep 2020 16:14:54 AEST
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
-Model group vae.
+Docstring
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -38,24 +38,21 @@ from tensorflow.contrib import tpu as contrib_tpu
 from utils import get_return_v, split_latents
 
 
-@gin.configurable("GroupVAE")
-class GroupVAE(BaseVAE):
-    """GroupVAE.
+@gin.configurable("LieVAE")
+class LieVAE(BaseVAE):
+    """LieVAE.
     Test
     """
-    def __init__(
-            self,
-            hy_rec=gin.REQUIRED,
-            hy_mat=gin.REQUIRED,
-            # hy_gmat=gin.REQUIRED,
-            hy_oth=gin.REQUIRED,
-            hy_spl=gin.REQUIRED,
-            hy_ncut=gin.REQUIRED):
+    def __init__(self,
+                 hy_rec=gin.REQUIRED,
+                 hy_spl=gin.REQUIRED,
+                 hy_hes=gin.REQUIRED,
+                 hy_lin=gin.REQUIRED,
+                 hy_ncut=gin.REQUIRED):
         self.hy_rec = hy_rec
-        self.hy_mat = hy_mat
-        # self.hy_gmat = hy_gmat
-        self.hy_oth = hy_oth
         self.hy_spl = hy_spl
+        self.hy_hes = hy_hes
+        self.hy_lin = hy_lin
         self.hy_ncut = int(hy_ncut)
 
     def model_fn(self, features, labels, mode, params):
@@ -68,20 +65,11 @@ class GroupVAE(BaseVAE):
             features, is_training=is_training)
         z_sampled = self.sample_from_latent_distribution(z_mean, z_logvar)
 
-        z_sampled_sum = z_sampled[:batch_size // 2] + \
-            z_sampled[batch_size // 2:]
-        # z_sampled_split_1, z_sampled_split_2 = split_latents(
-        # z_sampled, batch_size)
         z_sampled_split_ls = split_latents(z_sampled,
                                            batch_size,
                                            hy_ncut=self.hy_ncut)
-        # z_sampled_all = tf.concat(
-        # [z_sampled, z_sampled_sum, z_sampled_split_1, z_sampled_split_2],
-        # axis=0)
-        z_sampled_all = tf.concat([z_sampled, z_sampled_sum] +
-                                  z_sampled_split_ls,
-                                  axis=0)
-        reconstructions, group_feats_G = self.decode_with_gfeats(
+        z_sampled_all = tf.concat([z_sampled] + z_sampled_split_ls, axis=0)
+        reconstructions, group_feats_G, lie_alg_G = self.decode_with_group_alg(
             z_sampled_all, data_shape, is_training)
 
         per_sample_loss = losses.make_reconstruction_loss(
@@ -89,7 +77,7 @@ class GroupVAE(BaseVAE):
         reconstruction_loss = tf.reduce_mean(per_sample_loss)
         kl_loss = compute_gaussian_kl(z_mean, z_logvar)
         regularizer = self.regularizer(kl_loss, z_mean, z_logvar, z_sampled,
-                                       group_feats_E, group_feats_G,
+                                       group_feats_E, group_feats_G, lie_alg_G,
                                        batch_size)
         loss = tf.add(reconstruction_loss, regularizer, name="loss")
         elbo = tf.add(reconstruction_loss, kl_loss, name="elbo")
@@ -129,8 +117,9 @@ class GroupVAE(BaseVAE):
         """
         For training use.
         """
-        return architectures.make_gaussian_encoder(input_tensor,
-                                                   is_training=is_training)
+        return get_return_v(
+            architectures.make_gaussian_encoder(input_tensor,
+                                                is_training=is_training), 3)
 
     def gaussian_encoder(self, input_tensor, is_training):
         """Applies the Gaussian encoder to images without return features.
@@ -146,12 +135,13 @@ class GroupVAE(BaseVAE):
             architectures.make_gaussian_encoder(input_tensor,
                                                 is_training=is_training), 2)
 
-    def decode_with_gfeats(self, latent_tensor, observation_shape,
-                           is_training):
+    def decode_with_group_alg(self, latent_tensor, observation_shape,
+                              is_training):
         """Decodes the latent_tensor to an observation."""
-        return architectures.make_decoder(latent_tensor,
-                                          observation_shape,
-                                          is_training=is_training)
+        return get_return_v(
+            architectures.make_decoder(latent_tensor,
+                                       observation_shape,
+                                       is_training=is_training), 3)
 
     def decode(self, latent_tensor, observation_shape, is_training):
         """Decodes the latent_tensor to an observation without features."""
@@ -161,46 +151,45 @@ class GroupVAE(BaseVAE):
                                        is_training=is_training), 1)
 
     def regularizer(self, kl_loss, z_mean, z_logvar, z_sampled, group_feats_E,
-                    group_feats_G, batch_size):
+                    group_feats_G, lie_alg_G, batch_size):
         del z_mean, z_logvar, z_sampled
-        mat_dim = group_feats_E.get_shape().as_list()[1]
+        mat_dim = group_feats_G.get_shape().as_list()[1]
         gfeats_G = group_feats_G[:batch_size]
-        gfeats_G_sum = group_feats_G[batch_size:batch_size + batch_size // 2]
-        # gfeats_G_split_1 = group_feats_G[batch_size +
-        # batch_size // 2:2 * batch_size +
-        # batch_size // 2]
-        # gfeats_G_split_2 = group_feats_G[2 * batch_size + batch_size // 2:]
         gfeats_G_split_ls = [
-            group_feats_G[(i + 1) * batch_size +
-                          batch_size // 2:(i + 2) * batch_size +
-                          batch_size // 2] for i in range(self.hy_ncut + 1)
+            group_feats_G[(i + 1) * batch_size:(i + 2) * batch_size]
+            for i in range(self.hy_ncut + 1)
+        ]
+        lie_alg_G_split_ls = [
+            lie_alg_G[(i + 1) * batch_size:(i + 2) * batch_size]
+            for i in range(self.hy_ncut + 1)
         ]
 
-        gfeats_E_mul = tf.matmul(group_feats_E[:batch_size // 2],
-                                 group_feats_E[batch_size // 2:])
-        # gfeats_G_mul = tf.matmul(gfeats_G[:batch_size // 2],
-        # gfeats_G[batch_size // 2:])
-        gfeats_G_2 = tf.matmul(gfeats_G, gfeats_G, transpose_b=True)
-        G_mat_eye = tf.eye(mat_dim,
-                           dtype=gfeats_G_2.dtype,
-                           batch_shape=[batch_size])
-        # gfeats_G_split_mul = tf.matmul(gfeats_G_split_1, gfeats_G_split_2)
         gfeats_G_split_mul = gfeats_G_split_ls[0]
         for i in range(1, self.hy_ncut + 1):
             gfeats_G_split_mul = tf.matmul(gfeats_G_split_mul,
                                            gfeats_G_split_ls[i])
 
-        rec_loss = tf.reduce_mean(
-            tf.reduce_sum(tf.square(group_feats_E - gfeats_G), axis=[1, 2]))
-        mat_loss = tf.reduce_mean(
-            tf.reduce_sum(tf.square(gfeats_E_mul - gfeats_G_sum), axis=[1, 2]))
-        # gmat_loss = tf.reduce_mean(
-        # tf.reduce_sum(tf.square(gfeats_G_mul - gfeats_G_sum), axis=[1, 2]))
-        oth_loss = tf.reduce_mean(
-            tf.reduce_sum(tf.square(gfeats_G_2 - G_mat_eye), axis=[1, 2]))
+        lie_alg_G_split_mul = lie_alg_G_split_ls[0]
+        lie_alg_linear_G_split_mul = lie_alg_G_split_ls[0]
+        for i in range(1, self.hy_ncut + 1):
+            lie_alg_G_split_mul = tf.matmul(lie_alg_G_split_mul,
+                                            lie_alg_G_split_ls[i])
+            lie_alg_linear_G_split_mul = lie_alg_linear_G_split_mul * lie_alg_G_split_ls[
+                i]
+
+        if group_feats_E is None:
+            rec_loss = 0
+        else:
+            rec_loss = tf.reduce_mean(
+                tf.reduce_sum(tf.square(group_feats_E - gfeats_G), axis=[1,
+                                                                         2]))
         spl_loss = tf.reduce_mean(
             tf.reduce_sum(tf.square(gfeats_G_split_mul - gfeats_G),
                           axis=[1, 2]))
-        loss = self.hy_rec * rec_loss + self.hy_mat * mat_loss + \
-            self.hy_oth * oth_loss + self.hy_spl * spl_loss
+        hessian_loss = tf.reduce_mean(tf.square(lie_alg_G_split_mul),
+                                      axis=[1, 2])
+        linear_loss = tf.reduce_mean(tf.square(lie_alg_linear_G_split_mul),
+                                     axis=[1, 2])
+        loss = self.hy_rec * rec_loss + self.hy_spl * spl_loss + \
+            self.hy_hes * hessian_loss + self.hy_lin * linear_loss
         return kl_loss + loss

@@ -13,19 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-dataset.name = "dsprites_full"
 model.batch_size = 64
-model.model = @LieVAE()
-GroupVAE.hy_rec = 1.
-GroupVAE.hy_spl = 1.
-GroupVAE.hy_hes = 0.
-GroupVAE.hy_lin = 0.
-GroupVAE.hy_ncut = 1
-model.random_seed = 0
 encoder.num_latent = 10
+model.model = @vae()
+dataset.name = "dsprites_full"
+vae.beta = 1.
 vae_optimizer.optimizer_fn = @AdamOptimizer
 model.training_steps = 300000
-#model.training_steps = 3000
 model.random_seed=0
 AdamOptimizer.beta1 = 0.9
 AdamOptimizer.beta2 = 0.999
@@ -33,8 +27,6 @@ AdamOptimizer.epsilon = 1e-08
 AdamOptimizer.learning_rate = 0.0001
 AdamOptimizer.name = 'Adam'
 AdamOptimizer.use_locking = False
-encoder.encoder_fn = @group_conv_encoder
-decoder.decoder_fn = @group_deconv_decoder
-group_conv_encoder.group_feats_size = 400
-group_deconv_decoder.group_feats_size = 400
+encoder.encoder_fn = @conv_encoder
+decoder.decoder_fn = @liealg_notrain_deconv_decoder
 reconstruction_loss.loss_fn = @bernoulli_loss
