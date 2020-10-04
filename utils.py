@@ -8,7 +8,7 @@
 
 # --- File Name: utils.py
 # --- Creation Date: 06-09-2020
-# --- Last Modified: Sat 03 Oct 2020 18:00:07 AEST
+# --- Last Modified: Mon 05 Oct 2020 02:30:48 AEDT
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -35,7 +35,8 @@ def get_return_v(x, topk=1):
 def split_latents(x, minibatch_size=1, hy_ncut=1):
     # x: [b, dim]
     # b = minibatch_size
-    b = x.get_shape().as_list()[0]
+    # b = x.get_shape().as_list()[0]
+    b = tf.shape(x)[0]
     dim = x.get_shape().as_list()[1]
     split_idx = tf.random.uniform(shape=[b, hy_ncut],
                                   maxval=dim + 1,
