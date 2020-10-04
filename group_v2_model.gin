@@ -16,7 +16,7 @@
 dataset.name = "dsprites_full"
 model.batch_size = 64
 model.model = @GroupV2VAE()
-GroupV2VAE.gmat = 0.
+GroupV2VAE.hy_gmat = 0.
 GroupV2VAE.hy_hes = 0.
 GroupV2VAE.hy_lin = 0.
 model.random_seed = 0
