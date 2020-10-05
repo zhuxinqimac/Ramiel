@@ -8,7 +8,7 @@
 
 # --- File Name: main_group_v2.py
 # --- Creation Date: 29-09-2020
-# --- Last Modified: Sat 03 Oct 2020 18:11:53 AEST
+# --- Last Modified: Mon 05 Oct 2020 15:11:33 AEDT
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -57,6 +57,10 @@ def main():
                         help='Name of the study.',
                         type=str,
                         default='unsupervised_study_v1')
+    parser.add_argument('--eval_only',
+                        help='Whether to train.',
+                        type=_str_to_bool,
+                        default=False)
     parser.add_argument('--model_gin',
                         help='Name of the gin config.',
                         type=str,
@@ -132,8 +136,9 @@ def main():
         "dataset.name = '" + args.dataset + "'",
         "reconstruction_loss.loss_fn = @" + args.recons_type
     ]
-    train.train_with_gin(model_dir, args.overwrite, [args.model_gin],
-                         gin_bindings)
+    if not args.eval_only:
+        train.train_with_gin(model_dir, args.overwrite, [args.model_gin],
+                             gin_bindings)
 
     # We fix the random seed for the postprocessing and evaluation steps (each
     # config gets a different but reproducible seed derived from a master seed of
