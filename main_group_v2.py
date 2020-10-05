@@ -8,7 +8,7 @@
 
 # --- File Name: main_group_v2.py
 # --- Creation Date: 29-09-2020
-# --- Last Modified: Mon 05 Oct 2020 15:11:33 AEDT
+# --- Last Modified: Mon 05 Oct 2020 15:44:29 AEDT
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -68,7 +68,7 @@ def main():
     parser.add_argument('--hyps',
                         help='Hyperparameters of gmat_hes_lin_seed.',
                         type=str,
-                        default='0_0_0_0')
+                        default='0_0_0_1_0')
     parser.add_argument('--group_feats_size',
                         help='Hyperparameters of group_feats_size.',
                         type=str,
@@ -128,11 +128,12 @@ def main():
         "GroupV2VAE.hy_gmat = " + args.hyps[0],
         "GroupV2VAE.hy_hes = " + args.hyps[1],
         "GroupV2VAE.hy_lin = " + args.hyps[2],
+        "group_v2_deconv_decoder.hy_ncut = " + args.hyps[3],
         "group_v2_deconv_decoder.group_feats_size = " + args.group_feats_size,
         "group_v2_deconv_decoder.lie_alg_init_scale = " + args.lie_alg_init_scale,
         "group_v2_deconv_decoder.lie_alg_init_type = '" + args.lie_alg_init_type + "'",
         "group_v2_deconv_decoder.n_act_points = " + args.n_act_points,
-        "model.random_seed = " + args.hyps[3],
+        "model.random_seed = " + args.hyps[4],
         "dataset.name = '" + args.dataset + "'",
         "reconstruction_loss.loss_fn = @" + args.recons_type
     ]

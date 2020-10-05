@@ -33,6 +33,7 @@ AdamOptimizer.name = 'Adam'
 AdamOptimizer.use_locking = False
 encoder.encoder_fn = @conv_encoder
 decoder.decoder_fn = @group_v2_deconv_decoder
+group_v2_deconv_decoder.hy_ncut = 1
 group_v2_deconv_decoder.group_feats_size = 400
 group_v2_deconv_decoder.lie_alg_init_scale = 0.1
 group_v2_deconv_decoder.lie_alg_init_type = 'none'

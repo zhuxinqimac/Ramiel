@@ -8,7 +8,7 @@
 
 # --- File Name: group_v2_architectures.py
 # --- Creation Date: 29-09-2020
-# --- Last Modified: Sat 03 Oct 2020 18:00:29 AEST
+# --- Last Modified: Mon 05 Oct 2020 15:41:05 AEDT
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -37,11 +37,12 @@ from utils import get_return_v, split_latents
 
 @gin.configurable("group_v2_deconv_decoder",
                   whitelist=[
-                      "group_feats_size", "lie_alg_init_scale",
+                      "hy_ncut", "group_feats_size", "lie_alg_init_scale",
                       "lie_alg_init_type", "n_act_points"
                   ])
 def group_v2_deconv_decoder(latent_tensor,
                             output_shape,
+                            hy_ncut=1,
                             group_feats_size=gin.REQUIRED,
                             lie_alg_init_scale=gin.REQUIRED,
                             lie_alg_init_type=gin.REQUIRED,
@@ -69,7 +70,7 @@ def group_v2_deconv_decoder(latent_tensor,
 
     lie_alg_basis_ls = []
     latent_dim = latent_tensor.get_shape().as_list()[-1]
-    latents_in_cut_ls = split_latents(latent_tensor, hy_ncut=1)  # [x0, x1]
+    latents_in_cut_ls = split_latents(latent_tensor, hy_ncut=hy_ncut)  # [x0, x1]
 
     mat_dim = int(math.sqrt(group_feats_size))
     for i in range(latent_dim):
@@ -93,20 +94,36 @@ def group_v2_deconv_decoder(latent_tensor,
         lie_alg = tf.reduce_sum(lie_alg_mul, axis=1)  # [b, mat_dim, mat_dim]
         lie_group = tf.linalg.expm(lie_alg)  # [b, mat_dim, mat_dim]
     else:
-        lie_alg_mul_0 = latents_in_cut_ls[
-            0][..., tf.newaxis, tf.
-               newaxis] * lie_alg_basis  # [b, lat_dim, mat_dim, mat_dim]
-        lie_alg_mul_1 = latents_in_cut_ls[
-            1][..., tf.newaxis, tf.
-               newaxis] * lie_alg_basis  # [b, lat_dim, mat_dim, mat_dim]
-        lie_alg_0 = tf.reduce_sum(lie_alg_mul_0,
-                                  axis=1)  # [b, mat_dim, mat_dim]
-        lie_alg_1 = tf.reduce_sum(lie_alg_mul_1,
-                                  axis=1)  # [b, mat_dim, mat_dim]
-        lie_alg = lie_alg_0 + lie_alg_1
-        lie_group_0 = tf.linalg.expm(lie_alg_0)  # [b, mat_dim, mat_dim]
-        lie_group_1 = tf.linalg.expm(lie_alg_1)  # [b, mat_dim, mat_dim]
-        lie_group = tf.matmul(lie_group_0, lie_group_1)
+
+        lie_group = tf.eye(
+            mat_dim,
+            dtype=latents_in_cut_ls[0].dtype)[tf.newaxis, ...]
+        lie_alg = 0
+        for latents_in_cut_i in latents_in_cut_ls:
+            lie_alg_mul_tmp = latents_in_cut_i[
+                ..., tf.newaxis, tf.newaxis] * lie_alg_basis  # [b, lat_dim, mat_dim, mat_dim]
+            lie_alg_tmp = tf.reduce_sum(
+                lie_alg_mul_tmp,
+                axis=1)  # [b, mat_dim, mat_dim]
+            lie_alg = lie_alg + lie_alg_tmp
+            lie_group_tmp = tf.linalg.expm(
+                lie_alg_tmp)  # [b, mat_dim, mat_dim]
+            lie_group = tf.matmul(lie_group,
+                                  lie_group_tmp)
+        # lie_alg_mul_0 = latents_in_cut_ls[
+            # 0][..., tf.newaxis, tf.
+               # newaxis] * lie_alg_basis  # [b, lat_dim, mat_dim, mat_dim]
+        # lie_alg_mul_1 = latents_in_cut_ls[
+            # 1][..., tf.newaxis, tf.
+               # newaxis] * lie_alg_basis  # [b, lat_dim, mat_dim, mat_dim]
+        # lie_alg_0 = tf.reduce_sum(lie_alg_mul_0,
+                                  # axis=1)  # [b, mat_dim, mat_dim]
+        # lie_alg_1 = tf.reduce_sum(lie_alg_mul_1,
+                                  # axis=1)  # [b, mat_dim, mat_dim]
+        # lie_alg = lie_alg_0 + lie_alg_1
+        # lie_group_0 = tf.linalg.expm(lie_alg_0)  # [b, mat_dim, mat_dim]
+        # lie_group_1 = tf.linalg.expm(lie_alg_1)  # [b, mat_dim, mat_dim]
+        # lie_group = tf.matmul(lie_group_0, lie_group_1)
 
     transed_act_points_tensor = tf.reshape(lie_group, [-1, mat_dim * mat_dim])
 
