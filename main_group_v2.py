@@ -8,7 +8,7 @@
 
 # --- File Name: main_group_v2.py
 # --- Creation Date: 29-09-2020
-# --- Last Modified: Mon 05 Oct 2020 15:44:29 AEDT
+# --- Last Modified: Wed 07 Oct 2020 02:50:28 AEDT
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -121,7 +121,10 @@ def main():
             print(e)
 
     # Call training module to train the custom model.
-    dir_name = "GroupV2VAE-" + "-".join(args.hyps)
+    dir_name = "GroupV2VAE-" + "-".join(args.hyps) + \
+        '-' + args.lie_alg_init_type + \
+        '-' + str(args.lie_alg_init_scale) + \
+        '-' + str(args.group_feats_size)
     output_directory = os.path.join(args.result_dir, dir_name)
     model_dir = os.path.join(output_directory, "model")
     gin_bindings = [
