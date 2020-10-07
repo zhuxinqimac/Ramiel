@@ -8,7 +8,7 @@
 
 # --- File Name: collect_results.py
 # --- Creation Date: 08-09-2020
-# --- Last Modified: Tue 08 Sep 2020 18:25:11 AEST
+# --- Last Modified: Wed 07 Oct 2020 15:37:38 AEDT
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -143,8 +143,12 @@ def main():
         if not os.path.isdir(sub_path):
             continue
         parse_subdir = subdir.split('-')
-        hyps = '-'.join(parse_subdir[1:-1])
-        seed = parse_subdir[-1]
+        if len(parse_subdir) >= 7:
+            hyps = '-'.join(parse_subdir[1:5]+parse_subdir[6:])
+            seed = parse_subdir[5]
+        else:
+            hyps = '-'.join(parse_subdir[1:-1])
+            seed = parse_subdir[-1]
         if hyps not in res_dict:
             res_dict[hyps] = [None] * 10
         # get result for this seed, a dictionary.
