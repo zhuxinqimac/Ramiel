@@ -8,7 +8,7 @@
 
 # --- File Name: group_v2_models.py
 # --- Creation Date: 29-09-2020
-# --- Last Modified: Sat 03 Oct 2020 18:09:18 AEST
+# --- Last Modified: Thu 08 Oct 2020 01:49:50 AEDT
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -61,9 +61,9 @@ class GroupV2VAE(BaseVAE):
         z_mean, z_logvar = self.gaussian_encoder(features, is_training=is_training)
         z_sampled = self.sample_from_latent_distribution(z_mean, z_logvar)
 
-        # z_sampled_sum = z_sampled[:batch_size // 2] + \
-            # z_sampled[batch_size // 2:]
-        # z_sampled_all = tf.concat([z_sampled, z_sampled_sum], axis=0)
+        z_sampled_sum = z_sampled[:batch_size // 2] + \
+            z_sampled[batch_size // 2:]
+        z_sampled_all = tf.concat([z_sampled, z_sampled_sum], axis=0)
         z_sampled_all = z_sampled
         reconstructions, group_feats_G, lie_alg_basis = self.decode_with_gfeats(
             z_sampled_all, data_shape, is_training)
@@ -149,10 +149,10 @@ class GroupV2VAE(BaseVAE):
         del z_mean, z_logvar, z_sampled
         mat_dim = group_feats_G.get_shape().as_list()[1]
         gfeats_G = group_feats_G[:batch_size]
-        # gfeats_G_sum = group_feats_G[batch_size:batch_size + batch_size // 2]
+        gfeats_G_sum = group_feats_G[batch_size:batch_size + batch_size // 2]
 
-        # gfeats_G_mul = tf.matmul(gfeats_G[:batch_size // 2],
-            # gfeats_G[batch_size // 2:batch_size])
+        gfeats_G_mul = tf.matmul(gfeats_G[:batch_size // 2],
+            gfeats_G[batch_size // 2:batch_size])
 
         lie_alg_basis_square = lie_alg_basis * lie_alg_basis
         # [1, lat_dim, mat_dim, mat_dim]
@@ -164,11 +164,11 @@ class GroupV2VAE(BaseVAE):
             lat_dim, dtype=lie_alg_basis_mul.dtype)[:, :, tf.newaxis, tf.newaxis]
         lie_alg_basis_mul = lie_alg_basis_mul * lie_alg_basis_mask
 
-        # gmat_loss = tf.reduce_mean(
-            # tf.reduce_sum(tf.square(gfeats_G_mul - gfeats_G_sum), axis=[1, 2]))
+        gmat_loss = tf.reduce_mean(
+            tf.reduce_sum(tf.square(gfeats_G_mul - gfeats_G_sum), axis=[1, 2]))
         hessian_loss = tf.reduce_mean(
             tf.reduce_sum(tf.square(lie_alg_basis_mul), axis=[2, 3]))
         lin_loss = tf.reduce_mean(tf.reduce_sum(lie_alg_basis_square, axis=[2, 3]))
-        # loss = self.hy_gmat * gmat_loss + self.hy_hes * hessian_loss + self.hy_lin * lin_loss
-        loss = self.hy_hes * hessian_loss + self.hy_lin * lin_loss
+        loss = self.hy_gmat * gmat_loss + self.hy_hes * hessian_loss + self.hy_lin * lin_loss
+        # loss = self.hy_hes * hessian_loss + self.hy_lin * lin_loss
         return kl_loss + loss
