@@ -8,7 +8,7 @@
 
 # --- File Name: group_v2_models.py
 # --- Creation Date: 29-09-2020
-# --- Last Modified: Thu 08 Oct 2020 01:49:50 AEDT
+# --- Last Modified: Thu 08 Oct 2020 01:58:06 AEDT
 # --- Author: Xinqi Zhu
 # .<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<
 """
@@ -64,7 +64,7 @@ class GroupV2VAE(BaseVAE):
         z_sampled_sum = z_sampled[:batch_size // 2] + \
             z_sampled[batch_size // 2:]
         z_sampled_all = tf.concat([z_sampled, z_sampled_sum], axis=0)
-        z_sampled_all = z_sampled
+        # z_sampled_all = z_sampled
         reconstructions, group_feats_G, lie_alg_basis = self.decode_with_gfeats(
             z_sampled_all, data_shape, is_training)
 
